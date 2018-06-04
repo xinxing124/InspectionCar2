@@ -1,6 +1,5 @@
 // InspectionCar2Dlg.cpp : 实现文件
 //
-
 #include "stdafx.h"
 #include "InspectionCar2.h"
 #include "InspectionCar2Dlg.h"
@@ -26,6 +25,10 @@ CInspectionCar2Dlg::CInspectionCar2Dlg(CWnd* pParent /*=NULL*/)
 	,m_iExitCount(0)
 	, m_dbTotalMileage(0)
 	, m_pThreeSerial(NULL)
+	, m_CurrAmount(0)
+	, m_iCurrCount(0)
+	, m_iLastCount(0)
+	, m_LiCheng(0)
 {
 	m_hIcon = AfxGetApp()->LoadIcon(IDR_MAINFRAME);
 }
@@ -69,6 +72,7 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 	::SetWindowPos(this->m_hWnd, HWND_TOPMOST, 0, 0, iFullWidth, iFullHeight, SWP_NOOWNERZORDER|SWP_SHOWWINDOW);
 
 	ReadParam();
+	ReadLiCheng();
 
 	//判断串口是否已经打开
 	if (m_pOneSerial != NULL)
@@ -132,6 +136,8 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 	m_BitmapBattery_6.LoadBitmap(IDB_BATTERY_6);//加载背景图片
 	
 	SetTimer(1,100, NULL);
+	SetTimer(2,300, NULL);
+	SetTimer(3,3000, NULL);
 
 	//系统退出
 	m_RectExitShow.left=5;
@@ -288,6 +294,10 @@ dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryBut
 	SpeedVal=m_dbSpeed*m_Xishu[1];
 	str.Format(L"%.2fKm/h",SpeedVal);
     dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+
+	//str.Format(L"%.3f",m_LiCheng);
+    //dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+
 	////总里程区域
 	//str.Format(L"%.2fKm",m_dbTotalMileage);
  //   dc.DrawText(str,m_RectTotalMileageShow, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK);
@@ -299,9 +309,10 @@ dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryBut
  //   dc.FillSolidRect(&rect,RGB(255,0,0));//红色填充
 	font.DeleteObject(); 
 
+	SpeedVal=m_dbSpeed*m_Xishu[1];
 	CPen RectPen(PS_SOLID,5,RGB(255,0,0));
 	dc.SelectObject(&RectPen); 
-
+	
 	dc.MoveTo(176,218);
 	dc.LineTo((int)(176+cos((360-(180-(-23+SpeedVal*6.76/5*180/27)))*PI/180)*126),(int)(218+sin((360-(180-(-23+SpeedVal*6.76/5*180/27)))*PI/180)*126));
 	RectPen.DeleteObject();
@@ -316,7 +327,8 @@ void CInspectionCar2Dlg::OnTimer(UINT_PTR nIDEvent)
 	static int iRefresh=0;
 	static int iLevelFlag=0;
 	byte sendbytes[] =   {0x01,0x03,0x02,0x58,0x00,0x04,0xC4,0x62};
-
+	//#02KS\r  
+	byte sendState[]={'#','0','1','K','S','\r'};
     byte sendfrequency[]={0x01,0x03,0x00,0x00,0x00,0x08,0x44,0x0C};
 	if(nIDEvent==1)
 	{
@@ -351,14 +363,87 @@ void CInspectionCar2Dlg::OnTimer(UINT_PTR nIDEvent)
 		case 2:
 			m_pThreeSerial->WriteSyncPort(sendbytes,8);
 			m_pTwoSerial->WriteSyncPort(sendfrequency,8);
+			//m_pOneSerial->WriteSyncPort(sendState,6);
+
+			//if(m_iLastCount<m_iCurrCount)
+			//{
+			//	m_LiCheng=(m_iCurrCount-m_iLastCount)*m_Xishu[3]+m_LiCheng;
+			//	m_iLastCount=m_iCurrCount;
+			//	WriteParam();
+
+			//}
+			//else if(m_iLastCount>m_iCurrCount)
+			//{
+			//	m_LiCheng=(m_iCurrCount+65535-m_iLastCount)*m_Xishu[3]+m_LiCheng;
+			//	m_iLastCount=m_iCurrCount;
+			//	WriteParam();
+			//}
+		break;
+		}
+	}
+	else if(nIDEvent==2)
+	{
+		m_pOneSerial->WriteSyncPort(sendState,6);
+	}
+	else if(nIDEvent==3)
+	{
+		switch(MODE){
+		case 2:
+			//m_pOneSerial->WriteSyncPort(sendState,6);
+
+			if(m_iLastCount<m_iCurrCount)
+			{
+				m_LiCheng=(m_iCurrCount-m_iLastCount)*m_Xishu[1]*1000.0/3600.0+m_LiCheng;
+				m_iLastCount=m_iCurrCount;
+				WriteParam();
+
+			}
+			else if(m_iLastCount>m_iCurrCount)
+			{
+				m_LiCheng=(m_iCurrCount+65536-m_iLastCount)*m_Xishu[1]*1000.0/3600.0+m_LiCheng;
+				m_iLastCount=m_iCurrCount;
+				WriteParam();
+			}
 		break;
 		}
 	}
 
 
+
 	CDialog::OnTimer(nIDEvent);
 }
 
+int CInspectionCar2Dlg::FileWrite(CString filename,char* lpBuffer,DWORD  nNumberOfBytesWritten)
+{
+	int lRet=0;
+	HANDLE hFile = INVALID_HANDLE_VALUE;	// 文件句柄 
+
+	// 创建一个文件或打开一个文件
+	hFile = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 
+					   NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (hFile == INVALID_HANDLE_VALUE)
+	{
+		//AfxMessageBox(_T("打开文件失败!"));
+		return -1;
+	}
+
+	BOOL ret = SetFilePointer(hFile, 0, NULL, FILE_BEGIN);		// 移动文件指针到文件开头
+	if (ret == 0xFFFFFFFF)
+	{
+		//AfxMessageBox(_T("将文件指针移至文件开头失败!"));
+		return -3;	
+	}
+
+	DWORD actlen;
+	ret=WriteFile(hFile, lpBuffer,nNumberOfBytesWritten, &actlen, NULL); 
+	if(!ret)
+	{
+		lRet=-4;
+	}
+
+	CloseHandle(hFile);
+	return lRet;
+}
 
 int CInspectionCar2Dlg::FileRead(CString filename,CString* content)
 {
@@ -438,6 +523,35 @@ void CInspectionCar2Dlg::Split(CString source, CStringArray& dest, CString divis
     }
 }
 
+void CInspectionCar2Dlg::WriteParam(void)
+{
+	int ret=0;
+	char Tmp[100];
+	int aLen=sprintf_s(Tmp,100,"%f",m_LiCheng);
+	if(aLen>0)
+	{
+		ret=FileWrite(_T("\\ResidentFlash2\\GUI\\licheng.txt"),Tmp,aLen);
+		
+	}
+}
+
+void CInspectionCar2Dlg::ReadLiCheng(void)
+{	
+	int ret=0;
+	CString strTmp;
+	wchar_t   *stopstring;
+
+	ret=FileRead(_T("\\ResidentFlash2\\GUI\\licheng.txt"),&strTmp);
+	if(ret<0)
+	{
+		m_LiCheng=0.0;
+	}
+	else
+	{
+		m_LiCheng=wcstod(strTmp,&stopstring);
+	}
+	
+}
 void CInspectionCar2Dlg::ReadParam(void)
 {
 	int ret=0;
@@ -445,16 +559,20 @@ void CInspectionCar2Dlg::ReadParam(void)
 	ret=FileRead(_T("\\ResidentFlash2\\GUI\\xishu.txt"),&strTmp);
 	if(ret<0)
 	{
-		for(int i=0;i<2;i++)
+		for(int i=0;i<8;i++)
 			m_Xishu[i]=1.0;
 	}
 	else
 	{
+		for(int i=0;i<8;i++)
+			m_Xishu[i]=1.0;
+
 		CStringArray dest;
 		wchar_t   *stopstring;
 		Split(strTmp,dest,_T(","));
 		int Count = dest.GetSize();
-		for(int i=0;i<2;i++)
+		m_XishuNum=Count;
+		for(int i=0;i<Count;i++)
 			m_Xishu[i]=wcstod(dest[i],&stopstring);
 	}
 }
@@ -506,37 +624,138 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	//BYTE *pRecvBuf = NULL; //接收缓冲区
 	////得到父对象指针
 	//CPatrolCarDlg* pThis = (CPatrolCarDlg*)pOwner;
-
+	char ch[14];
 	BYTE OneRecv[1024]={0};
 	static BYTE OneRecvBuf[1024]={0};
 	static int OneRevPos=0;
+	static double CurrSetVal=1.7;
+	double TargetSpeed=0.0;
+	double SpeedVal=0.0;
 	int j=0;
 	//得到父对象指针
 	CInspectionCar2Dlg* pThis = (CInspectionCar2Dlg*)pOwner;
 	//将接收的缓冲区拷贝到pRecvBuf种
 	//pRecvBuf = new BYTE[bufLen];
 	CopyMemory(OneRecvBuf+OneRevPos,buf,bufLen);
-	OneRevPos=OneRevPos+bufLen;
+	//OneRevPos=OneRevPos+bufLen;
 
-	for(int i=0;i<OneRevPos;i++)
+	//#02KS\r  
+	if(OneRecvBuf[0]=='>')
 	{
-		if(OneRecvBuf[i]=='#')
+		switch(OneRecvBuf[4])
 		{
-			for(int k=i;k<OneRevPos;k++)
+		case 0:
+			TargetSpeed=0.0;
+			break;
+		case 'E'://3
+			TargetSpeed=3.0;
+			break;
+		case 'D'://6
+			TargetSpeed=6.0;
+			break;
+		case 'B'://9
+			TargetSpeed=9.0;
+			break;
+		case '7'://12
+			TargetSpeed=12.0;
+			break;
+		case '3'://15
+			TargetSpeed=15.0;
+			break;
+		case 'C'://20
+			TargetSpeed=20.0;
+			break;
+		case 'F':
+			TargetSpeed=0.0;
+			CurrSetVal=1.7;
+			sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+			pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			break;
+		}
+		if(TargetSpeed!=0)
+		{
+			SpeedVal=pThis->m_dbSpeed*pThis->m_Xishu[1];
+			//if(fabs(TargetSpeed-SpeedVal)<0.25)
+			//	return;
+
+			if(TargetSpeed-SpeedVal>=6.0)
 			{
-				if(OneRecvBuf[k]=='$')
-				{
-					
-					CopyMemory(OneRecv,OneRecvBuf+i+1,k-1);
-					//strRecv=CString((char*)OneRecv);
-				//	pThis->m_strInfo=CString((char*)OneRecv);
-				//	pThis->InvalidateRect(&pThis->m_RectInfoShow);
-					OneRevPos=0;
-					break;
-				}
+				//#01D0+01.000/r
+				CurrSetVal+=0.5;
+				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			}
+			else if(TargetSpeed-SpeedVal>=3.0)
+			{
+				CurrSetVal+=0.1;
+				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			}
+			else if(TargetSpeed-SpeedVal>=0.8)
+			{
+				CurrSetVal+=0.05;
+				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			}
+			//else if(TargetSpeed-SpeedVal>=0.5)
+			//{
+			//	CurrSetVal+=0.01;
+			//	CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+			//	sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+			//	pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			//}
+			else if(TargetSpeed-SpeedVal<=-6.0)
+			{
+				CurrSetVal-=0.5;
+				CurrSetVal=(CurrSetVal<0.0?0.0:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			}
+			else if(TargetSpeed-SpeedVal<=-3.0)
+			{
+				CurrSetVal-=0.1;
+				CurrSetVal=(CurrSetVal<0.0?0.0:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			}
+			else if(TargetSpeed-SpeedVal<=-0.8)
+			{
+				CurrSetVal-=0.05;
+				CurrSetVal=(CurrSetVal<0.0?0.0:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			}
+			/*else if(TargetSpeed-SpeedVal<=-0.5)
+			{
+				CurrSetVal-=0.01;
+				CurrSetVal=(CurrSetVal<0.0?0.0:CurrSetVal);
+				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+			}*/
 		}
 	}
+	//for(int i=0;i<OneRevPos;i++)
+	//{
+	//	if(OneRecvBuf[i]=='#')
+	//	{
+	//		for(int k=i;k<OneRevPos;k++)
+	//		{
+	//			if(OneRecvBuf[k]=='$')
+	//			{
+	//				
+	//				CopyMemory(OneRecv,OneRecvBuf+i+1,k-1);
+	//				//strRecv=CString((char*)OneRecv);
+	//			//	pThis->m_strInfo=CString((char*)OneRecv);
+	//			//	pThis->InvalidateRect(&pThis->m_RectInfoShow);
+	//				OneRevPos=0;
+	//				break;
+	//			}
+	//		}
+	//	}
+	//}
 
 	//if(OneRecvBuf[0]=='#')
 	//{
@@ -585,8 +804,7 @@ void CALLBACK CInspectionCar2Dlg::OnTwoSerialRead(void * pOwner,BYTE* buf,DWORD 
 	int revint16[8];
  	int j=0;
 	int iTemp=0;
-	//01 03 10 00 01 00 02 00 03 00 04 00 05 00 06 00 00 00 00 xx xx
-	
+
 	//得到父对象指针
 	CInspectionCar2Dlg* pThis = (CInspectionCar2Dlg*)pOwner;
 	CopyMemory(TwoRecvBuf+TwoRevPos,buf,bufLen);	
@@ -603,8 +821,10 @@ void CALLBACK CInspectionCar2Dlg::OnTwoSerialRead(void * pOwner,BYTE* buf,DWORD 
 			TwoRevPos=0;
 			for(int i=3,j=0;i<19;j++,i+=2)
 				revint16[j] =TwoRecvBuf[i] * 256+ TwoRecvBuf[i + 1];
-			iTemp=(int)(revint16[4]+revint16[5]);
-			pThis->m_dbSpeed =iTemp/2.0;
+			pThis->m_iCurrCount=revint16[0];
+			pThis->m_dbSpeed =revint16[4];
+			//iTemp=(int)(revint16[4]+revint16[5]);
+			//pThis->m_dbSpeed =iTemp/2.0;
 		}
 	}
 }
@@ -643,6 +863,29 @@ void CALLBACK CInspectionCar2Dlg::OnThreeSerialRead(void * pOwner,BYTE* buf,DWOR
 			pThis->m_dbVoltage_2 =iTemp/10.0;
 		}
 	}
+	else if(ThreeRecvBuf[17]==1)
+	{
+		if(ThreeRevPos==0&&bufLen<30)
+		{
+			ThreeRevPos=ThreeRevPos+bufLen;
+		}
+		else
+		{
+			ThreeRevPos=0;
+			for(int i=(17+3),j=0;i<(17+11);j++,i+=2)
+				revint16[j] =ThreeRecvBuf[i] * 256+ ThreeRecvBuf[i + 1];
+
+			iTemp=(int)(revint16[0]/100.0);
+			pThis->m_dbVoltage_1=iTemp/10.0;
+			iTemp=(int)(revint16[1]/100.0);
+			//pThis->m_dbSpeed =iTemp/10.0;
+			if(MODE==1)
+				pThis->m_dbSpeed =revint16[1]/1000.0;
+			iTemp=(int)(revint16[2]/100.0);
+			pThis->m_dbVoltage_2 =iTemp/10.0;
+		}
+	}
+
 }
 BOOL CInspectionCar2Dlg::OnEraseBkgnd(CDC* pDC)
 {

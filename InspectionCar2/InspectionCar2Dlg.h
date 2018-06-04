@@ -33,14 +33,19 @@ public:
 	CCESeries *m_pTwoSerial;
 	CCESeries* m_pThreeSerial;
 	int		m_iThreeSerialMode;
-	double m_Xishu[2];
+	double m_Xishu[8];
+	double m_LiCheng;
+	int    m_XishuNum;
 	//定义串口接收数据函数类型
 	static void CALLBACK OnOneSerialRead(void * pOwner,BYTE* buf,DWORD bufLen);
 	static void CALLBACK OnTwoSerialRead(void * pOwner,BYTE* buf,DWORD bufLen);
 	static void CALLBACK OnThreeSerialRead(void * pOwner,BYTE* buf,DWORD bufLen);
 	int FileRead(CString filename,CString* content);
+	int FileWrite(CString filename,char* lpBuffer,DWORD  nNumberOfBytesWritten);
 	void Split(CString source, CStringArray& dest, CString division);
+	void ReadLiCheng(void);
 	void ReadParam(void);
+	void WriteParam(void);
 
 	CRect m_RectExitShow;
 	CRect m_RectMeterShow;
@@ -58,6 +63,8 @@ public:
 	CString m_strTempMileage;
 
 	int m_iExitCount;
+	int m_iCurrCount;
+	int m_iLastCount;
 	double m_dbVoltage_1;
 	double m_dbVoltage_2;
 	double m_dbSpeed;
@@ -77,4 +84,5 @@ public:
 	afx_msg void OnTimer(UINT_PTR nIDEvent);
 	afx_msg void OnDestroy();
 	afx_msg BOOL OnEraseBkgnd(CDC* pDC);
+	double m_CurrAmount;
 };
