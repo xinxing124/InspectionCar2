@@ -632,8 +632,8 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	BYTE OneRecv[1024]={0};
 	static BYTE OneRecvBuf[1024]={0};
 	static int OneRevPos=0;
-	static double CurrSetVal=1.6;
-	double TempSetVal=1.6;
+	static double CurrSetVal=1.7;
+	double TempSetVal=1.7;
 	int Count=0;
 	double TargetSpeed=0.0;
 	double SpeedVal=0.0;
