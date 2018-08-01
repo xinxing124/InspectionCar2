@@ -650,6 +650,39 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	//#02KS\r  
 	if(OneRecvBuf[0]=='>')
 	{
+		//switch(OneRecvBuf[4])
+		//{
+		//case 'E'://3
+		//	TargetSpeed=3.0;
+		//	TempSetVal=1.7;
+		//	break;
+		//case 'D'://6
+		//	TargetSpeed=6.0;
+		//	TempSetVal=1.75;
+		//	break;
+		//case 'B'://9
+		//	TargetSpeed=9.0;
+		//	TempSetVal=1.8;
+		//	break;
+		//case '7'://12
+		//	TargetSpeed=12.0;
+		//	TempSetVal=1.9;
+		//	break;
+		//case '3'://15
+		//	TargetSpeed=15.0;
+		//	TempSetVal=2.0;
+		//	break;
+		//case 'C'://20
+		//	TargetSpeed=20.0;
+		//	TempSetVal=2.6;
+		//	break;
+		//case 'F':
+		//	TargetSpeed=0.0;
+		//	CurrSetVal=1.3;
+		//	sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
+		//	pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
+		//	break;
+		//}
 		switch(OneRecvBuf[4])
 		{
 		case 'E'://3
@@ -660,23 +693,23 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 			TargetSpeed=6.0;
 			TempSetVal=1.75;
 			break;
-		case 'B'://9
+		case 'C'://9
 			TargetSpeed=9.0;
 			TempSetVal=1.8;
 			break;
-		case '7'://12
+		case 'B'://12
 			TargetSpeed=12.0;
 			TempSetVal=1.9;
 			break;
-		case '3'://15
+		case 'A'://15
 			TargetSpeed=15.0;
 			TempSetVal=2.0;
 			break;
-		case 'C'://20
+		case '9'://20
 			TargetSpeed=20.0;
 			TempSetVal=2.6;
 			break;
-		case 'F':
+		default:
 			TargetSpeed=0.0;
 			CurrSetVal=1.3;
 			sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
