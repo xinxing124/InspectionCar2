@@ -630,10 +630,12 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	//CPatrolCarDlg* pThis = (CPatrolCarDlg*)pOwner;
 	char ch[14];
 	BYTE OneRecv[1024]={0};
+	static bool SetFlag=false;
 	static BYTE OneRecvBuf[1024]={0};
 	static int OneRevPos=0;
-	static double CurrSetVal=1.7;
-	double TempSetVal=1.7;
+	static double LastTargetSpeed=0.0;
+	static double CurrSetVal=1.8;
+	double TempSetVal=1.8;
 	int Count=0;
 	double TargetSpeed=0.0;
 	double SpeedVal=0.0;
@@ -650,41 +652,42 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	{
 		switch(OneRecvBuf[4])
 		{
-		case 0:
-			TargetSpeed=0.0;
-			break;
 		case 'E'://3
 			TargetSpeed=3.0;
-			TempSetVal=1.65;
+			TempSetVal=1.7;
 			break;
 		case 'D'://6
 			TargetSpeed=6.0;
-			TempSetVal=1.8;
+			TempSetVal=1.75;
 			break;
 		case 'B'://9
 			TargetSpeed=9.0;
-			TempSetVal=2.0;
+			TempSetVal=1.8;
 			break;
 		case '7'://12
 			TargetSpeed=12.0;
-			TempSetVal=2.2;
+			TempSetVal=1.9;
 			break;
 		case '3'://15
 			TargetSpeed=15.0;
-			TempSetVal=2.4;
+			TempSetVal=2.0;
 			break;
 		case 'C'://20
 			TargetSpeed=20.0;
-			TempSetVal=2.8;
+			TempSetVal=2.6;
 			break;
 		case 'F':
 			TargetSpeed=0.0;
-			CurrSetVal=1.6;
+			CurrSetVal=1.3;
 			sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 			pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			break;
 		}
-			
+		if(LastTargetSpeed!=TargetSpeed)
+		{
+			LastTargetSpeed=TargetSpeed;
+			CurrSetVal=TempSetVal;
+		}
 		if(TargetSpeed!=0)
 		{
 			SpeedVal=pThis->m_dbSpeed*pThis->m_Xishu[1];
