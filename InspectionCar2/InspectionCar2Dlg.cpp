@@ -1,4 +1,4 @@
-// InspectionCar2Dlg.cpp : ÊµÏÖÎÄ¼ş
+ï»¿// InspectionCar2Dlg.cpp : å®ç°æ–‡ä»¶
 //
 #include "stdafx.h"
 #include "InspectionCar2.h"
@@ -8,7 +8,7 @@
 #define new DEBUG_NEW
 #endif
 
-// CInspectionCar2Dlg ¶Ô»°¿ò
+// CInspectionCar2Dlg å¯¹è¯æ¡†
 #define MODE	2
 #define PI	3.1415926535898
 
@@ -50,19 +50,19 @@ BEGIN_MESSAGE_MAP(CInspectionCar2Dlg, CDialog)
 END_MESSAGE_MAP()
 
 
-// CInspectionCar2Dlg ÏûÏ¢´¦Àí³ÌĞò
+// CInspectionCar2Dlg æ¶ˆæ¯å¤„ç†ç¨‹åº
 
 BOOL CInspectionCar2Dlg::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	// ÉèÖÃ´Ë¶Ô»°¿òµÄÍ¼±ê¡£µ±Ó¦ÓÃ³ÌĞòÖ÷´°¿Ú²»ÊÇ¶Ô»°¿òÊ±£¬¿ò¼Ü½«×Ô¶¯
-	//  Ö´ĞĞ´Ë²Ù×÷
-	SetIcon(m_hIcon, TRUE);			// ÉèÖÃ´óÍ¼±ê
-	SetIcon(m_hIcon, FALSE);		// ÉèÖÃĞ¡Í¼±ê
+	// è®¾ç½®æ­¤å¯¹è¯æ¡†çš„å›¾æ ‡ã€‚å½“åº”ç”¨ç¨‹åºä¸»çª—å£ä¸æ˜¯å¯¹è¯æ¡†æ—¶ï¼Œæ¡†æ¶å°†è‡ªåŠ¨
+	//  æ‰§è¡Œæ­¤æ“ä½œ
+	SetIcon(m_hIcon, TRUE);			// è®¾ç½®å¤§å›¾æ ‡
+	SetIcon(m_hIcon, FALSE);		// è®¾ç½®å°å›¾æ ‡
 
-	// TODO: ÔÚ´ËÌí¼Ó¶îÍâµÄ³õÊ¼»¯´úÂë
-	MoveWindow(0,0,480,272);//ÉèÖÃ´°Ìå´óĞ¡Îª480*272
+	// TODO: åœ¨æ­¤æ·»åŠ é¢å¤–çš„åˆå§‹åŒ–ä»£ç 
+	MoveWindow(0,0,480,272);//è®¾ç½®çª—ä½“å¤§å°ä¸º480*272
 	SetCursorPos(1000,1000);
 	ShowCursor(FALSE);
 	
@@ -74,7 +74,7 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 	ReadParam();
 	ReadLiCheng();
 
-	//ÅĞ¶Ï´®¿ÚÊÇ·ñÒÑ¾­´ò¿ª
+	//åˆ¤æ–­ä¸²å£æ˜¯å¦å·²ç»æ‰“å¼€
 	if (m_pOneSerial != NULL)
 	{
 		m_pOneSerial->ClosePort();
@@ -83,57 +83,57 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 		m_pOneSerial = NULL;
 	}
 	
-	//ĞÂ½¨´®¿ÚÍ¨Ñ¶¶ÔÏó
+	//æ–°å»ºä¸²å£é€šè®¯å¯¹è±¡
 	m_pOneSerial = new CCESeries();
 	m_pOneSerial->m_OnSeriesRead = OnOneSerialRead; //
 
-	//´ò¿ª´®¿Ú
+	//æ‰“å¼€ä¸²å£
 	if(m_pOneSerial->OpenPort(this,1,9600,0,8,0))
 	{
-		//AfxMessageBox(L"´®¿Ú´ò¿ª³É¹¦");
+		//AfxMessageBox(L"ä¸²å£æ‰“å¼€æˆåŠŸ");
 		//Sleep(200);
 	}
 	else
 	{
-		AfxMessageBox(L"´®¿Ú1´ò¿ªÊ§°Ü");
+		AfxMessageBox(L"ä¸²å£1æ‰“å¼€å¤±è´¥");
 	}
 
 	m_pTwoSerial = new CCESeries();
 	m_pTwoSerial->m_OnSeriesRead = OnTwoSerialRead; //
 
-	//´ò¿ª´®¿Ú
+	//æ‰“å¼€ä¸²å£
 	if(m_pTwoSerial->OpenPort(this,2,9600,0,8,0))
 	{
-		//AfxMessageBox(L"´®¿Ú´ò¿ª³É¹¦");
+		//AfxMessageBox(L"ä¸²å£æ‰“å¼€æˆåŠŸ");
 		//Sleep(200);
 	}
 	else
 	{
-		AfxMessageBox(L"´®¿Ú2´ò¿ªÊ§°Ü");
+		AfxMessageBox(L"ä¸²å£2æ‰“å¼€å¤±è´¥");
 	}
 
 	m_pThreeSerial = new CCESeries();
 	m_pThreeSerial->m_OnSeriesRead = OnThreeSerialRead; 
 
-	//´ò¿ª´®¿Ú
+	//æ‰“å¼€ä¸²å£
 	if(m_pThreeSerial->OpenPort(this,3,9600,0,8,0))
 	{
-		//AfxMessageBox(L"´®¿Ú´ò¿ª³É¹¦");
+		//AfxMessageBox(L"ä¸²å£æ‰“å¼€æˆåŠŸ");
 		//Sleep(200);
 	}
 	else
 	{
-		AfxMessageBox(L"´®¿Ú3´ò¿ªÊ§°Ü");
+		AfxMessageBox(L"ä¸²å£3æ‰“å¼€å¤±è´¥");
 	}
 
 
-	m_BitmapMain.LoadBitmap(IDB_PIC_MAIN);//¼ÓÔØ±³¾°Í¼Æ¬
-	m_BitmapBattery_1.LoadBitmap(IDB_BATTERY_1);//¼ÓÔØ±³¾°Í¼Æ¬
-	m_BitmapBattery_2.LoadBitmap(IDB_BATTERY_2);//¼ÓÔØ±³¾°Í¼Æ¬
-	m_BitmapBattery_3.LoadBitmap(IDB_BATTERY_3);//¼ÓÔØ±³¾°Í¼Æ¬
-	m_BitmapBattery_4.LoadBitmap(IDB_BATTERY_4);//¼ÓÔØ±³¾°Í¼Æ¬
-	m_BitmapBattery_5.LoadBitmap(IDB_BATTERY_5);//¼ÓÔØ±³¾°Í¼Æ¬
-	m_BitmapBattery_6.LoadBitmap(IDB_BATTERY_6);//¼ÓÔØ±³¾°Í¼Æ¬
+	m_BitmapMain.LoadBitmap(IDB_PIC_MAIN);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
+	m_BitmapBattery_1.LoadBitmap(IDB_BATTERY_1);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
+	m_BitmapBattery_2.LoadBitmap(IDB_BATTERY_2);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
+	m_BitmapBattery_3.LoadBitmap(IDB_BATTERY_3);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
+	m_BitmapBattery_4.LoadBitmap(IDB_BATTERY_4);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
+	m_BitmapBattery_5.LoadBitmap(IDB_BATTERY_5);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
+	m_BitmapBattery_6.LoadBitmap(IDB_BATTERY_6);//åŠ è½½èƒŒæ™¯å›¾ç‰‡
 	
 	SetTimer(1,100, NULL);
 	SetTimer(2,50, NULL);
@@ -142,61 +142,61 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 	//byte sendfrequency[]={0x01,0x03,0x00,0x00,0x00,0x08,0x44,0x0C};
 	//m_pTwoSerial->WriteSyncPort(sendfrequency,8);
 
-	//ÏµÍ³ÍË³ö
+	//ç³»ç»Ÿé€€å‡º
 	m_RectExitShow.left=5;
 	m_RectExitShow.bottom=62;
 	m_RectExitShow.top=32;
 	m_RectExitShow.right=100;
 
-	//Ê±¼äÈÕÆÚÇøÓò
+	//æ—¶é—´æ—¥æœŸåŒºåŸŸ
 	m_RectDateTimeShow.left=90;
 	m_RectDateTimeShow.bottom=41;
 	m_RectDateTimeShow.top=18;
 	m_RectDateTimeShow.right=330;
 
-	//±íÅÌÇøÓò
+	//è¡¨ç›˜åŒºåŸŸ
 	m_RectMeterShow.left=41;
 	m_RectMeterShow.bottom=278;
 	m_RectMeterShow.top=90;
 	m_RectMeterShow.right=310;
 
-	//µç³Ø1ÇøÓò
+	//ç”µæ± 1åŒºåŸŸ
 	m_RectBatteryShow_1.left=380;
 	m_RectBatteryShow_1.bottom=117;
 	m_RectBatteryShow_1.top=80;
 	m_RectBatteryShow_1.right=448;
 
-	//µç³Ø2ÇøÓò
+	//ç”µæ± 2åŒºåŸŸ
 	m_RectBatteryShow_2.left=380;
 	m_RectBatteryShow_2.bottom=235;
 	m_RectBatteryShow_2.top=210;
 	m_RectBatteryShow_2.right=448;
 
-	//ËÙ¶ÈÇøÓò
+	//é€Ÿåº¦åŒºåŸŸ
 	m_RectSpeedShow.left=120;
 	m_RectSpeedShow.bottom=266;
 	m_RectSpeedShow.top=245;
 	m_RectSpeedShow.right=230;
 
-	//×ÜÀï³ÌÇøÓò
+	//æ€»é‡Œç¨‹åŒºåŸŸ
 	m_RectTotalMileageShow.left=206;
 	m_RectTotalMileageShow.bottom=230;
 	m_RectTotalMileageShow.top=210;
 	m_RectTotalMileageShow.right=319;
 
-	//µç³Ø1°´Å¥
+	//ç”µæ± 1æŒ‰é’®
 	m_RectBatteryButton_1.left=399;
 	m_RectBatteryButton_1.bottom=70;
 	m_RectBatteryButton_1.top=30;
 	m_RectBatteryButton_1.right=419;
 
-	//µç³Ø2°´Å¥
+	//ç”µæ± 2æŒ‰é’®
 	m_RectBatteryButton_2.left=399;
 	m_RectBatteryButton_2.bottom=201;
 	m_RectBatteryButton_2.top=160;
 	m_RectBatteryButton_2.right=419;
 
-	return TRUE;  // ³ı·Ç½«½¹µãÉèÖÃµ½¿Ø¼ş£¬·ñÔò·µ»Ø TRUE
+	return TRUE;  // é™¤éå°†ç„¦ç‚¹è®¾ç½®åˆ°æ§ä»¶ï¼Œå¦åˆ™è¿”å› TRUE
 }
 
 #if defined(_DEVICE_RESOLUTION_AWARE) && !defined(WIN32_PLATFORM_WFSP)
@@ -217,83 +217,83 @@ void CInspectionCar2Dlg::OnSize(UINT /*nType*/, int /*cx*/, int /*cy*/)
 void CInspectionCar2Dlg::OnPaint()
 {
 	CPaintDC dc(this); // device context for painting
-	// TODO: ÔÚ´Ë´¦Ìí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂë
-	// ²»Îª»æÍ¼ÏûÏ¢µ÷ÓÃ CDialog::OnPaint()
+	// TODO: åœ¨æ­¤å¤„æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç 
+	// ä¸ä¸ºç»˜å›¾æ¶ˆæ¯è°ƒç”¨ CDialog::OnPaint()
 
 CString str = L"36.00V";
 double SpeedVal=0.0;
 CRect rect;
 CBitmap   bBitmap  ; 
 CBitmap* pOldBitmap;
-CDC   hMemDC; //¼ÓÔØ±³¾°Í¼Æ¬µÄÄÚ´æDC
+CDC   hMemDC; //åŠ è½½èƒŒæ™¯å›¾ç‰‡çš„å†…å­˜DC
 
-hMemDC.CreateCompatibleDC(&dc);//´´½¨¼æÈİDC
-pOldBitmap = hMemDC.SelectObject(&m_BitmapMain); //Ñ¡Èë±³¾°Í¼Æ¬
+hMemDC.CreateCompatibleDC(&dc);//åˆ›å»ºå…¼å®¹DC
+pOldBitmap = hMemDC.SelectObject(&m_BitmapMain); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 dc.BitBlt( 0,0 ,480 ,272 ,&hMemDC ,0 ,0 ,SRCCOPY);
 
 if(m_dbVoltage_1>=52.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_6); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_6); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_1>=50.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_5); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_5); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_1>=48.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_4); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_4); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_1>=46.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_3); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_3); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_1>=43.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_2); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_2); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_1<43.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_1); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_1); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }
-dc.BitBlt(m_RectBatteryButton_1.left,m_RectBatteryButton_1.top ,m_RectBatteryButton_1.right,m_RectBatteryButton_1.bottom,&hMemDC ,0 ,0 ,SRCCOPY);//µç³Ø1
+dc.BitBlt(m_RectBatteryButton_1.left,m_RectBatteryButton_1.top ,m_RectBatteryButton_1.right,m_RectBatteryButton_1.bottom,&hMemDC ,0 ,0 ,SRCCOPY);//ç”µæ± 1
 
 
 if(m_dbVoltage_2>=52.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_6); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_6); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_2>=50.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_5); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_5); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_2>=48.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_4); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_4); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_2>=46.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_3); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_3); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_2>=43.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_2); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_2); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }else if(m_dbVoltage_2<43.0)
 {
-	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_1); //Ñ¡Èë±³¾°Í¼Æ¬
+	pOldBitmap = hMemDC.SelectObject(&m_BitmapBattery_1); //é€‰å…¥èƒŒæ™¯å›¾ç‰‡
 }
-dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryButton_2.right,m_RectBatteryButton_2.bottom,&hMemDC ,0 ,0 ,SRCCOPY);//µç³Ø2
+dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryButton_2.right,m_RectBatteryButton_2.bottom,&hMemDC ,0 ,0 ,SRCCOPY);//ç”µæ± 2
 
 
 	CFont font;
 	font.CreateFont(22, 0, 0, 0, FW_NORMAL,FALSE, FALSE, FALSE, 0, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,   DEFAULT_QUALITY, DEFAULT_PITCH | FF_ROMAN, L"Times New Roman");
-	//font.CreatePointFont(6,L"ËÎÌå"); 
+	//font.CreatePointFont(6,L"å®‹ä½“"); 
 	dc.SetBkMode(TRANSPARENT);
-	dc.SetTextColor(RGB(255,255,255));    //Static¿Ø¼ş1µÄ×ÖÌåÑÕÉ«-ºìÉ«
+	dc.SetTextColor(RGB(255,255,255));    //Staticæ§ä»¶1çš„å­—ä½“é¢œè‰²-çº¢è‰²
 	dc.SelectObject(&font); 
 
     //CString str = L"36.00V";
-	//ÈÕÆÚÊ±¼äÇøÓò
+	//æ—¥æœŸæ—¶é—´åŒºåŸŸ
 	CTime time = CTime::GetCurrentTime();       
 	str.Format(L"%04d-%02d-%02d %02d:%02d:%02d",time.GetYear(),time.GetMonth(),time.GetDay(),time.GetHour(),time.GetMinute(),time.GetSecond());  
     dc.DrawText(str,m_RectDateTimeShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
-	//µç³Ø1ÇøÓò
+	//ç”µæ± 1åŒºåŸŸ
 	str.Format(L"%.2fV",m_dbVoltage_1);
     dc.DrawText(str,m_RectBatteryShow_1, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK);
-	//µç³Ø2ÇøÓò
+	//ç”µæ± 2åŒºåŸŸ
 	str.Format(L"%.2fV",m_dbVoltage_2);
     dc.DrawText(str,m_RectBatteryShow_2, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK);
-	//ËÙ¶ÈÇøÓò
+	//é€Ÿåº¦åŒºåŸŸ
 	SpeedVal=m_dbSpeed*m_Xishu[1];
 	str.Format(L"%.2fKm/h",SpeedVal);
     dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
@@ -301,7 +301,7 @@ dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryBut
 	//str.Format(L"%.3f",m_LiCheng);
     //dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
 
-	////×ÜÀï³ÌÇøÓò
+	////æ€»é‡Œç¨‹åŒºåŸŸ
 	//str.Format(L"%.2fKm",m_dbTotalMileage);
  //   dc.DrawText(str,m_RectTotalMileageShow, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK);
 	//CRect rect;
@@ -309,7 +309,7 @@ dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryBut
 	//rect.bottom=m_RectTotalMileageShow.bottom+3;
 	//rect.top =m_RectTotalMileageShow.top-3;
 	//rect.right=m_RectTotalMileageShow.right+3;
- //   dc.FillSolidRect(&rect,RGB(255,0,0));//ºìÉ«Ìî³ä
+ //   dc.FillSolidRect(&rect,RGB(255,0,0));//çº¢è‰²å¡«å……
 	font.DeleteObject(); 
 
 	SpeedVal=m_dbSpeed*m_Xishu[1];
@@ -324,7 +324,7 @@ dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryBut
 
 void CInspectionCar2Dlg::OnTimer(UINT_PTR nIDEvent)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 
 	CRect rect;
 	static int iRefresh=0;
@@ -420,21 +420,21 @@ void CInspectionCar2Dlg::OnTimer(UINT_PTR nIDEvent)
 int CInspectionCar2Dlg::FileWrite(CString filename,char* lpBuffer,DWORD  nNumberOfBytesWritten)
 {
 	int lRet=0;
-	HANDLE hFile = INVALID_HANDLE_VALUE;	// ÎÄ¼ş¾ä±ú 
+	HANDLE hFile = INVALID_HANDLE_VALUE;	// æ–‡ä»¶å¥æŸ„ 
 
-	// ´´½¨Ò»¸öÎÄ¼ş»ò´ò¿ªÒ»¸öÎÄ¼ş
+	// åˆ›å»ºä¸€ä¸ªæ–‡ä»¶æˆ–æ‰“å¼€ä¸€ä¸ªæ–‡ä»¶
 	hFile = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 
 					   NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		//AfxMessageBox(_T("´ò¿ªÎÄ¼şÊ§°Ü!"));
+		//AfxMessageBox(_T("æ‰“å¼€æ–‡ä»¶å¤±è´¥!"));
 		return -1;
 	}
 
-	BOOL ret = SetFilePointer(hFile, 0, NULL, FILE_BEGIN);		// ÒÆ¶¯ÎÄ¼şÖ¸Õëµ½ÎÄ¼ş¿ªÍ·
+	BOOL ret = SetFilePointer(hFile, 0, NULL, FILE_BEGIN);		// ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆåˆ°æ–‡ä»¶å¼€å¤´
 	if (ret == 0xFFFFFFFF)
 	{
-		//AfxMessageBox(_T("½«ÎÄ¼şÖ¸ÕëÒÆÖÁÎÄ¼ş¿ªÍ·Ê§°Ü!"));
+		//AfxMessageBox(_T("å°†æ–‡ä»¶æŒ‡é’ˆç§»è‡³æ–‡ä»¶å¼€å¤´å¤±è´¥!"));
 		return -3;	
 	}
 
@@ -452,52 +452,52 @@ int CInspectionCar2Dlg::FileWrite(CString filename,char* lpBuffer,DWORD  nNumber
 int CInspectionCar2Dlg::FileRead(CString filename,CString* content)
 {
 	int lRet;
-	HANDLE hFile = INVALID_HANDLE_VALUE;	// ÎÄ¼ş¾ä±ú 
+	HANDLE hFile = INVALID_HANDLE_VALUE;	// æ–‡ä»¶å¥æŸ„ 
 	if(::GetFileAttributes(filename)==0xFFFFFFFF)
 	{
-	//::AfxMessageBox(_T("ÎÄ¼ş²»´æÔÚ"));
+	//::AfxMessageBox(_T("æ–‡ä»¶ä¸å­˜åœ¨"));
 		return -5;
 	}
-	// ´´½¨Ò»¸öÎÄ¼ş»ò´ò¿ªÒ»¸öÎÄ¼ş
+	// åˆ›å»ºä¸€ä¸ªæ–‡ä»¶æˆ–æ‰“å¼€ä¸€ä¸ªæ–‡ä»¶
 	hFile = CreateFile(filename, GENERIC_READ | GENERIC_WRITE, 0, 
 					   NULL, OPEN_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if (hFile == INVALID_HANDLE_VALUE)
 	{
-		//AfxMessageBox(_T("´ò¿ªÎÄ¼şÊ§°Ü!"));
+		//AfxMessageBox(_T("æ‰“å¼€æ–‡ä»¶å¤±è´¥!"));
 		return -1;
 	}
 
 	DWORD filelen,actlen;
 	char *pcharbuff;
 	
-	filelen = GetFileSize(hFile, NULL);							// »ñÈ¡ÎÄ¼ş´óĞ¡
+	filelen = GetFileSize(hFile, NULL);							// è·å–æ–‡ä»¶å¤§å°
 	if (filelen == 0xFFFFFFFF)
 	{
-		//AfxMessageBox(_T("»ñÈ¡ÎÄ¼ş´óĞ¡Ê§°Ü!"));
+		//AfxMessageBox(_T("è·å–æ–‡ä»¶å¤§å°å¤±è´¥!"));
 		return -2;	
 	}
 
-	BOOL ret = SetFilePointer(hFile, 0, NULL, FILE_BEGIN);		// ÒÆ¶¯ÎÄ¼şÖ¸Õëµ½ÎÄ¼ş¿ªÍ·
+	BOOL ret = SetFilePointer(hFile, 0, NULL, FILE_BEGIN);		// ç§»åŠ¨æ–‡ä»¶æŒ‡é’ˆåˆ°æ–‡ä»¶å¼€å¤´
 	if (ret == 0xFFFFFFFF)
 	{
-		//AfxMessageBox(_T("½«ÎÄ¼şÖ¸ÕëÒÆÖÁÎÄ¼ş¿ªÍ·Ê§°Ü!"));
+		//AfxMessageBox(_T("å°†æ–‡ä»¶æŒ‡é’ˆç§»è‡³æ–‡ä»¶å¼€å¤´å¤±è´¥!"));
 		return -3;	
 	}
 
 	pcharbuff = new char[filelen];
-	ret = ReadFile(hFile, pcharbuff, filelen, &actlen, NULL);	// ´ÓÎÄ¼şÖĞ¶Á³öÊı¾İ 
+	ret = ReadFile(hFile, pcharbuff, filelen, &actlen, NULL);	// ä»æ–‡ä»¶ä¸­è¯»å‡ºæ•°æ® 
 	if (ret == TRUE)
 	{
 		LPTSTR pStr = content->GetBuffer(filelen);	
-		// ½«×Ö½Ú×ª»¯Îª Unicode ×Ö·û´®
+		// å°†å­—èŠ‚è½¬åŒ–ä¸º Unicode å­—ç¬¦ä¸²
 		MultiByteToWideChar(CP_ACP, 0, pcharbuff, filelen, pStr, filelen);
 		content->ReleaseBuffer();
-		//AfxMessageBox(_T("¶ÁÎÄ¼ş³É¹¦!"));	
+		//AfxMessageBox(_T("è¯»æ–‡ä»¶æˆåŠŸ!"));	
 		lRet=0;
 	}
 	else
 	{
-		//AfxMessageBox(_T("¶ÁÎÄ¼şÊ§°Ü!"));	
+		//AfxMessageBox(_T("è¯»æ–‡ä»¶å¤±è´¥!"));	
 		lRet=-4;
 	}
 
@@ -584,49 +584,49 @@ void CInspectionCar2Dlg::OnDestroy()
 {
 	CDialog::OnDestroy();
 
-	// TODO: ÔÚ´Ë´¦Ìí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂë
+	// TODO: åœ¨æ­¤å¤„æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç 
 	KillTimer(1);
-	//¹Ø±Õ´®¿Ú
+	//å…³é—­ä¸²å£
 	//
 	if (m_pOneSerial != NULL)
 	{
-		//¹Ø±Õ´®¿Ú
+		//å…³é—­ä¸²å£
 		m_pOneSerial->ClosePort();
 
-		//ÊÍ·Å´®¿Ú¶ÔÏó
+		//é‡Šæ”¾ä¸²å£å¯¹è±¡
 		delete m_pOneSerial;
 		m_pOneSerial = NULL;
-		//AfxMessageBox(L"´®¿Ú¹Ø±Õ³É¹¦");
+		//AfxMessageBox(L"ä¸²å£å…³é—­æˆåŠŸ");
 	}
 
 	if (m_pTwoSerial != NULL)
 	{
-		//¹Ø±Õ´®¿Ú
+		//å…³é—­ä¸²å£
 		m_pTwoSerial->ClosePort();
 
-		//ÊÍ·Å´®¿Ú¶ÔÏó
+		//é‡Šæ”¾ä¸²å£å¯¹è±¡
 		delete m_pTwoSerial;
 		m_pTwoSerial = NULL;
-		//AfxMessageBox(L"´®¿Ú¹Ø±Õ³É¹¦");
+		//AfxMessageBox(L"ä¸²å£å…³é—­æˆåŠŸ");
 	}
 	if (m_pThreeSerial != NULL)
 	{
-		//¹Ø±Õ´®¿Ú
+		//å…³é—­ä¸²å£
 		m_pThreeSerial->ClosePort();
 
-		//ÊÍ·Å´®¿Ú¶ÔÏó
+		//é‡Šæ”¾ä¸²å£å¯¹è±¡
 		delete m_pThreeSerial;
 		m_pThreeSerial = NULL;
-		//AfxMessageBox(L"´®¿Ú¹Ø±Õ³É¹¦");
+		//AfxMessageBox(L"ä¸²å£å…³é—­æˆåŠŸ");
 	}
 }
 
-//¶¨Òå´®¿Ú½ÓÊÕÊı¾İº¯ÊıÀàĞÍ
+//å®šä¹‰ä¸²å£æ¥æ”¶æ•°æ®å‡½æ•°ç±»å‹
 void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD bufLen)
 {
 	//CString strRecv=L"";
-	//BYTE *pRecvBuf = NULL; //½ÓÊÕ»º³åÇø
-	////µÃµ½¸¸¶ÔÏóÖ¸Õë
+	//BYTE *pRecvBuf = NULL; //æ¥æ”¶ç¼“å†²åŒº
+	////å¾—åˆ°çˆ¶å¯¹è±¡æŒ‡é’ˆ
 	//CPatrolCarDlg* pThis = (CPatrolCarDlg*)pOwner;
 	char ch[14];
 	BYTE OneRecv[1024]={0};
@@ -640,9 +640,9 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	double TargetSpeed=0.0;
 	double SpeedVal=0.0;
 	int j=0;
-	//µÃµ½¸¸¶ÔÏóÖ¸Õë
+	//å¾—åˆ°çˆ¶å¯¹è±¡æŒ‡é’ˆ
 	CInspectionCar2Dlg* pThis = (CInspectionCar2Dlg*)pOwner;
-	//½«½ÓÊÕµÄ»º³åÇø¿½±´µ½pRecvBufÖÖ
+	//å°†æ¥æ”¶çš„ç¼“å†²åŒºæ‹·è´åˆ°pRecvBufç§
 	//pRecvBuf = new BYTE[bufLen];
 	CopyMemory(OneRecvBuf+OneRevPos,buf,bufLen);
 	//OneRevPos=OneRevPos+bufLen;
@@ -833,7 +833,7 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 	//	}
 	//}
 
-	////½«½ÓÊÕµÄ»º³åÇø¿½±´µ½pRecvBufÖÖ
+	////å°†æ¥æ”¶çš„ç¼“å†²åŒºæ‹·è´åˆ°pRecvBufç§
 	//strRecv=CString((char*)buf);
 	
 	//m_strReceive+=strRecv;
@@ -858,14 +858,14 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 
 void CALLBACK CInspectionCar2Dlg::OnTwoSerialRead(void * pOwner,BYTE* buf,DWORD bufLen)
 {
-	static BYTE TwoRecvBuf[1024]={0}; //½ÓÊÕ»º³åÇø
+	static BYTE TwoRecvBuf[1024]={0}; //æ¥æ”¶ç¼“å†²åŒº
 	static int TwoRevPos=false;
 	int revint16[8];
  	int j=0;
 	int iTemp=0;
 	byte sendfrequency[]={0x01,0x03,0x00,0x00,0x00,0x08,0x44,0x0C};
 
-	//µÃµ½¸¸¶ÔÏóÖ¸Õë
+	//å¾—åˆ°çˆ¶å¯¹è±¡æŒ‡é’ˆ
 	CInspectionCar2Dlg* pThis = (CInspectionCar2Dlg*)pOwner;
 	CopyMemory(TwoRecvBuf+TwoRevPos,buf,bufLen);	
 
@@ -894,13 +894,13 @@ void CALLBACK CInspectionCar2Dlg::OnTwoSerialRead(void * pOwner,BYTE* buf,DWORD 
 
 void CALLBACK CInspectionCar2Dlg::OnThreeSerialRead(void * pOwner,BYTE* buf,DWORD bufLen)
 {
-	//BYTE *pRecvBuf = NULL; //½ÓÊÕ»º³åÇø
+	//BYTE *pRecvBuf = NULL; //æ¥æ”¶ç¼“å†²åŒº
 	static BYTE ThreeRecvBuf[1024]={0};
 	static int ThreeRevPos=0;
 	int j=0;
 	int iTemp=0;
 	int revint16[4];
-	//µÃµ½¸¸¶ÔÏóÖ¸Õë
+	//å¾—åˆ°çˆ¶å¯¹è±¡æŒ‡é’ˆ
 	CInspectionCar2Dlg* pThis = (CInspectionCar2Dlg*)pOwner;
 	CopyMemory(ThreeRecvBuf+ThreeRevPos,buf,bufLen);
 	
@@ -952,7 +952,7 @@ void CALLBACK CInspectionCar2Dlg::OnThreeSerialRead(void * pOwner,BYTE* buf,DWOR
 }
 BOOL CInspectionCar2Dlg::OnEraseBkgnd(CDC* pDC)
 {
-	// TODO: ÔÚ´ËÌí¼ÓÏûÏ¢´¦Àí³ÌĞò´úÂëºÍ/»òµ÷ÓÃÄ¬ÈÏÖµ
+	// TODO: åœ¨æ­¤æ·»åŠ æ¶ˆæ¯å¤„ç†ç¨‹åºä»£ç å’Œ/æˆ–è°ƒç”¨é»˜è®¤å€¼
 	return TRUE;
 	//return CDialog::OnEraseBkgnd(pDC);
 }

@@ -1,28 +1,28 @@
-// InspectionCar2Dlg.h : Í·ÎÄ¼ş
+ï»¿// InspectionCar2Dlg.h : å¤´æ–‡ä»¶
 //
 
 #pragma once
 #include "afxwin.h"
 #include "CESeries.h"
 
-// CInspectionCar2Dlg ¶Ô»°¿ò
+// CInspectionCar2Dlg å¯¹è¯æ¡†
 class CInspectionCar2Dlg : public CDialog
 {
-// ¹¹Ôì
+// æ„é€ 
 public:
-	CInspectionCar2Dlg(CWnd* pParent = NULL);	// ±ê×¼¹¹Ôìº¯Êı
+	CInspectionCar2Dlg(CWnd* pParent = NULL);	// æ ‡å‡†æ„é€ å‡½æ•°
 
-// ¶Ô»°¿òÊı¾İ
+// å¯¹è¯æ¡†æ•°æ®
 	enum { IDD = IDD_INSPECTIONCAR2_DIALOG };
 
 	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV Ö§³Ö
+	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV æ”¯æŒ
 
-// ÊµÏÖ
+// å®ç°
 protected:
 	HICON m_hIcon;
 
-	// Éú³ÉµÄÏûÏ¢Ó³Éäº¯Êı
+	// ç”Ÿæˆçš„æ¶ˆæ¯æ˜ å°„å‡½æ•°
 	virtual BOOL OnInitDialog();
 #if defined(_DEVICE_RESOLUTION_AWARE) && !defined(WIN32_PLATFORM_WFSP)
 	afx_msg void OnSize(UINT /*nType*/, int /*cx*/, int /*cy*/);
@@ -36,7 +36,7 @@ public:
 	double m_Xishu[8];
 	double m_LiCheng;
 	int    m_XishuNum;
-	//¶¨Òå´®¿Ú½ÓÊÕÊı¾İº¯ÊıÀàĞÍ
+	//å®šä¹‰ä¸²å£æ¥æ”¶æ•°æ®å‡½æ•°ç±»å‹
 	static void CALLBACK OnOneSerialRead(void * pOwner,BYTE* buf,DWORD bufLen);
 	static void CALLBACK OnTwoSerialRead(void * pOwner,BYTE* buf,DWORD bufLen);
 	static void CALLBACK OnThreeSerialRead(void * pOwner,BYTE* buf,DWORD bufLen);
