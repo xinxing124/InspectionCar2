@@ -293,14 +293,19 @@ dc.BitBlt(m_RectBatteryButton_2.left,m_RectBatteryButton_2.top ,m_RectBatteryBut
 	//电池2区域
 	str.Format(L"%.2fV",m_dbVoltage_2);
     dc.DrawText(str,m_RectBatteryShow_2, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK);
-	//速度区域
-	SpeedVal=m_dbSpeed*m_Xishu[1];
-	str.Format(L"%.2fKm/h",SpeedVal);
-    dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
 
-	//str.Format(L"%.3f",m_LiCheng);
-    //dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
-
+	if(m_Xishu[0]>0.0)
+	{
+		//速度区域
+		SpeedVal=m_dbSpeed*m_Xishu[1];
+		str.Format(L"%.2fKm/h",SpeedVal);
+		dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+	}
+	else
+	{
+		str.Format(L"%.3f",m_LiCheng);
+		dc.DrawText(str,m_RectSpeedShow, DT_CENTER | DT_EDITCONTROL | DT_WORDBREAK);
+	}
 	////总里程区域
 	//str.Format(L"%.2fKm",m_dbTotalMileage);
  //   dc.DrawText(str,m_RectTotalMileageShow, DT_LEFT | DT_EDITCONTROL | DT_WORDBREAK);
@@ -741,41 +746,43 @@ void CALLBACK CInspectionCar2Dlg::OnOneSerialRead(void * pOwner,BYTE* buf,DWORD 
 			{
 				//#01D0+01.000/r
 				CurrSetVal+=0.1;
-				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				CurrSetVal=(CurrSetVal>5.0?5.0:CurrSetVal);
 				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			}
 			else if(TargetSpeed-SpeedVal>=3.0)
 			{
 				CurrSetVal+=0.05;
-				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				CurrSetVal=(CurrSetVal>5.0?5.0:CurrSetVal);
 				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			}
 			else if(TargetSpeed-SpeedVal>=0.8)
 			{
 				CurrSetVal+=0.01;
-				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				CurrSetVal=(CurrSetVal>5.0?5.0:CurrSetVal);
 				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			}
 			else if(TargetSpeed-SpeedVal>=0.5)
 			{
 				CurrSetVal+=0.0025;
-				CurrSetVal=(CurrSetVal>4.8?4.8:CurrSetVal);
+				CurrSetVal=(CurrSetVal>5.0?5.0:CurrSetVal);
 				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			}
 			else if(TargetSpeed-SpeedVal<=-9.0)
 			{
-				CurrSetVal-=0.1;
+				//CurrSetVal-=0.05;
+				CurrSetVal-=0.02;
 				CurrSetVal=(CurrSetVal<0.0?0.0:CurrSetVal);
 				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
 			}
-			else if(TargetSpeed-SpeedVal<=-3.0)
+			else if(TargetSpeed-SpeedVal<=-5.0)
 			{
-				CurrSetVal-=0.025;
+				//CurrSetVal-=0.025;
+				CurrSetVal-=0.002;
 				CurrSetVal=(CurrSetVal<0.0?0.0:CurrSetVal);
 				sprintf_s(ch,13,"#01D0+%2.3f\r",CurrSetVal);
 				pThis->m_pOneSerial->WriteSyncPort((BYTE*)ch,13);
