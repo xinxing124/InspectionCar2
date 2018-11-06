@@ -13,6 +13,7 @@
 #define PI	3.1415926535898
 #define DEBUGMODE	0
 CString strDebugInfo;
+bool bOpenReadThread = false;
 
 CInspectionCar2Dlg::CInspectionCar2Dlg(CWnd* pParent /*=NULL*/)
 	: CDialog(CInspectionCar2Dlg::IDD, pParent)
@@ -107,6 +108,7 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 	if(m_pTwoSerial->OpenPort(this,2,9600,0,8,0))
 	{
 		//AfxMessageBox(L"串口打开成功");
+		//m_pTwoSerial->SyncSetSeriesTimeouts(10,10,50,5000,5000);//同步操作把m_pTwoSerial->m_OnSeriesRead = OnTwoSerialRead; 屏蔽
 		//Sleep(200);
 	}
 	else
@@ -143,6 +145,8 @@ BOOL CInspectionCar2Dlg::OnInitDialog()
 
 	//byte sendfrequency[]={0x01,0x03,0x00,0x00,0x00,0x08,0x44,0x0C};
 	//m_pTwoSerial->WriteSyncPort(sendfrequency,8);
+	//m_hReadThread = CreateThread(NULL,0,ReadThreadFunc,this,0,&m_dwReadThreadID);
+	//bOpenReadThread = true;
 
 	//系统退出
 	m_RectExitShow.left=5;
@@ -1022,4 +1026,41 @@ BOOL CInspectionCar2Dlg::OnEraseBkgnd(CDC* pDC)
 	// TODO: 在此添加消息处理程序代码和/或调用默认值
 	return TRUE;
 	//return CDialog::OnEraseBkgnd(pDC);
+}
+
+DWORD CInspectionCar2Dlg::ReadThreadFunc(LPVOID lparam)
+{
+	int revint16[8];
+	int iRevLen=0;
+	byte bytRev[100];
+	static bool SetFlag=false;
+	
+	static double LastTargetSpeed=0.0;
+	static double CurrSetVal=1.8;
+	double TempSetVal=1.8;
+	int Count=0;
+	double TargetSpeed=0.0;
+	double SpeedVal=0.0;
+	int j=0;
+	long t1,t2,t3;
+	byte sendState[]={'#','0','1','K','S','\r'};
+    byte sendfrequency[]={0x01,0x03,0x00,0x00,0x00,0x08,0x44,0x0C};
+
+	CInspectionCar2Dlg *pThis = (CInspectionCar2Dlg*)lparam;
+
+	while(bOpenReadThread)	
+	{
+		t1=GetTickCount();
+		iRevLen=pThis->m_pTwoSerial->SyncReadPort(sendfrequency,8,21,bytRev);
+		if(iRevLen==21)
+		{
+			for(int i=3,j=0;i<19;j++,i+=2)
+				revint16[j] =bytRev[i] * 256+ bytRev[i + 1];
+			pThis->m_iCurrCount=revint16[0];
+			pThis->m_dbSpeed =revint16[4];
+		}
+		t2=GetTickCount();//程序段结束后取得系统运行时间(ms)
+		t3=t2-t1;
+	}
+	return 0;
 }

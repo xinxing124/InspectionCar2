@@ -29,6 +29,11 @@ protected:
 #endif
 	DECLARE_MESSAGE_MAP()
 public:
+	HANDLE m_hReadThread;
+	//读线程ID标识
+	DWORD m_dwReadThreadID;
+	static  DWORD WINAPI ReadThreadFunc(LPVOID lparam);
+
 	CCESeries *m_pOneSerial;
 	CCESeries *m_pTwoSerial;
 	CCESeries* m_pThreeSerial;

@@ -325,13 +325,12 @@ BOOL CCESeries::WriteSyncPort(const BYTE*buf , DWORD bufLen)
 *函数介绍：向串口写入数据并读取
 *入口参数：buf ：待写入数据缓冲区
 	       bufLen : 待写入缓冲区长度
-		   overtime : 读超时设置
 		   asynLen : 待读取的缓冲区长度
 		   asynbuf : 读取到的数据
 *出口参数：(无)
-*返回值：TRUE:设置成功;FALSE:设置失败
+*返回值：读取到的数据长度
 */
-BOOL CCESeries::ReadAsynPort(const BYTE*buf , DWORD bufLen,DWORD overtime,DWORD asynLen,BYTE* asynbuf)
+DWORD CCESeries::SyncReadPort(const BYTE*buf , DWORD bufLen,DWORD syncLen,BYTE* syncbuf)
 {
 	DWORD dwNumBytesWritten;
 	DWORD dwHaveNumWritten =0 ; //已经写入多少
@@ -340,98 +339,136 @@ BOOL CCESeries::ReadAsynPort(const BYTE*buf , DWORD bufLen,DWORD overtime,DWORD 
 	DWORD willReadLen;
 	DWORD dwRevLen=0;
 	DWORD dwWriteLen=0;
-	DWORD dwReadErrors;
-	COMSTAT	cmState;
+	BOOL bRet = FALSE;
+	DWORD Error;
+	COMSTAT cs = {0};
+	int iRevLen=0;
+	//long t1=GetTickCount();
 
 	int iInc = 0; //如果3次写入不成功，返回FALSE
 	ASSERT(m_hComm != INVALID_HANDLE_VALUE);
 
-	do
+	PurgeComm(m_hComm, PURGE_RXABORT|PURGE_TXCLEAR|PURGE_RXCLEAR|PURGE_TXABORT);
+
+	bRet = WriteFile(m_hComm, buf, bufLen, &dwNumBytesWritten, NULL);
+	if (bRet == TRUE && bufLen == dwNumBytesWritten)
 	{
-		if (WriteFile (m_hComm,					//串口句柄 
-			buf+dwHaveNumWritten,				//被写数据缓冲区 
-			bufLen - dwHaveNumWritten,          //被写数据缓冲区大小
-			&dwNumBytesWritten,					//函数执行成功后，返回实际向串口写的个数	
-			NULL))								//此处必须设置NULL
-		{
-			dwHaveNumWritten = dwHaveNumWritten + dwNumBytesWritten;
-			//写入完成
-			if (dwHaveNumWritten == bufLen)
-			{
-				break;
-			}
-			iInc++;
-			if (iInc >= 3)
-			{
-				return FALSE;
-			}
-			Sleep(10);
-		}
-		else
-		{
-			return FALSE;
-		}
-	}while (TRUE);
+		iRevLen=0;
+		//设置读取1个字节数据，当缓存中有数据到达时则会立即返回，否则直到超时
+		bRet = ReadFile(m_hComm, syncbuf, 1, &actualReadLen, NULL);
 	
-	//清空串口
-	PurgeComm(m_hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
-	
-	SetCommMask (m_hComm, EV_RXCHAR | EV_CTS | EV_DSR );
-
-	DWORD   start;   
-	DWORD   time_i=0;   
-	start=GetTickCount(); 
-	while (time_i<=overtime)
-	{   	
-		//if (WaitCommEvent(m_hComm,&evtMask,0))
-		//{			
-			//SetCommMask (m_hComm, EV_RXCHAR | EV_CTS | EV_DSR );
-			//表示串口收到字符		
-			//if (evtMask & EV_RXCHAR) 
-			//{
-				ClearCommError(m_hComm,&dwReadErrors,&cmState);
-				willReadLen = cmState.cbInQue ;
-				if (willReadLen <= 0)
-				{
-					continue;
-				}
-				willReadLen=100;
-				//分配内存
-				readBuf = new BYTE[willReadLen];
-				ZeroMemory(readBuf,willReadLen);
-				//读取串口数据
-				ReadFile(m_hComm, readBuf, willReadLen, &actualReadLen,0);
-				
-				//如果读取的数据大于0，
-				if (actualReadLen>0)
-				{
-					if(asynLen==0)
-					{
-						memcpy(asynbuf,readBuf,actualReadLen);
-						return TRUE;
-					}
-					else if(dwRevLen<asynLen)
-					{
-						memcpy(asynbuf+dwRevLen,readBuf,actualReadLen);
-						dwRevLen+=actualReadLen;
-						if(asynLen==dwRevLen) 
-							return TRUE;
-					}
-				}
-
-				//释放内存
-				delete[] readBuf;
-				readBuf = NULL;
-			//}
-		//}
-		//如果收到读线程退出信号，则退出线程
-		if (WaitForSingleObject(m_hReadCloseEvent,500) == WAIT_OBJECT_0)
+		//如果是超时rtn=true但是ReadSize=0，如果有数据到达，会读取一个字节ReadSize=1
+		if (bRet == TRUE && 1 == actualReadLen)
 		{
-			break;
+			//查询剩余多少字节未读取，存储于cs.cbInQue中
+			ClearCommError(m_hComm, &Error, &cs);
+			willReadLen =cs.cbInQue<(syncLen-1)?(syncLen-1):cs.cbInQue;
+			if (willReadLen > 0)
+			{
+				iRevLen = 0;
+				//由于之前等待时以读取一个字节，所欲buf+1
+				bRet = ReadFile(m_hComm, syncbuf+1, willReadLen, &actualReadLen, NULL);
+				//bRet = ReadFile(m_hComm, syncbuf+1, 511, &actualReadLen, NULL);
+				if (bRet)
+				{
+					iRevLen = actualReadLen + 1;
+					syncLen=iRevLen;
+				}
+			}
 		}
-		time_i=GetTickCount()-start;
 	}
-	return FALSE;		
+	//long t2=GetTickCount();//程序段结束后取得系统运行时间(ms)
+	//long t3=t2-t1;
+	return iRevLen;
+
+	//str.Format("接收数：%ld  用时：%f 次数：%ld  总次数：%ld\n",len,difftime(c_end,c_start),out1,cout);
+
+	//do
+	//{
+	//	if (WriteFile (m_hComm,					//串口句柄 
+	//		buf+dwHaveNumWritten,				//被写数据缓冲区 
+	//		bufLen - dwHaveNumWritten,          //被写数据缓冲区大小
+	//		&dwNumBytesWritten,					//函数执行成功后，返回实际向串口写的个数	
+	//		NULL))								//此处必须设置NULL
+	//	{
+	//		dwHaveNumWritten = dwHaveNumWritten + dwNumBytesWritten;
+	//		//写入完成
+	//		if (dwHaveNumWritten == bufLen)
+	//		{
+	//			break;
+	//		}
+	//		iInc++;
+	//		if (iInc >= 3)
+	//		{
+	//			return FALSE;
+	//		}
+	//		Sleep(10);
+	//	}
+	//	else
+	//	{
+	//		return FALSE;
+	//	}
+	//}while (TRUE);
+	//
+	//////清空串口
+	////PurgeComm(m_hComm, PURGE_RXCLEAR | PURGE_TXCLEAR );
+	////
+	////SetCommMask (m_hComm, EV_RXCHAR | EV_CTS | EV_DSR );
+
+	//DWORD   start;   
+	//DWORD   time_i=0;   
+	//start=GetTickCount(); 
+	//while (time_i<=overtime)
+	//{   	
+	//	//if (WaitCommEvent(m_hComm,&evtMask,0))
+	//	//{			
+	//		//SetCommMask (m_hComm, EV_RXCHAR | EV_CTS | EV_DSR );
+	//		//表示串口收到字符		
+	//		//if (evtMask & EV_RXCHAR) 
+	//		//{
+	//			ClearCommError(m_hComm,&dwReadErrors,&cmState);
+	//			willReadLen = cmState.cbInQue ;
+	//			if (willReadLen <= 0)
+	//			{
+	//				continue;
+	//			}
+	//			willReadLen=100;
+	//			//分配内存
+	//			readBuf = new BYTE[willReadLen];
+	//			ZeroMemory(readBuf,willReadLen);
+	//			//读取串口数据
+	//			ReadFile(m_hComm, readBuf, willReadLen, &actualReadLen,0);
+	//			
+	//			//如果读取的数据大于0，
+	//			if (actualReadLen>0)
+	//			{
+	//				if(asynLen==0)
+	//				{
+	//					memcpy(asynbuf,readBuf,actualReadLen);
+	//					return TRUE;
+	//				}
+	//				else if(dwRevLen<asynLen)
+	//				{
+	//					memcpy(asynbuf+dwRevLen,readBuf,actualReadLen);
+	//					dwRevLen+=actualReadLen;
+	//					if(asynLen==dwRevLen) 
+	//						return TRUE;
+	//				}
+	//			}
+
+	//			//释放内存
+	//			delete[] readBuf;
+	//			readBuf = NULL;
+	//		//}
+	//	//}
+	//	//如果收到读线程退出信号，则退出线程
+	//	if (WaitForSingleObject(m_hReadCloseEvent,500) == WAIT_OBJECT_0)
+	//	{
+	//		break;
+	//	}
+	//	time_i=GetTickCount()-start;
+	//}
+	//return FALSE;		
 }
 
 /*
@@ -443,6 +480,19 @@ BOOL CCESeries::ReadAsynPort(const BYTE*buf , DWORD bufLen,DWORD overtime,DWORD 
 BOOL CCESeries::SetSeriesTimeouts(COMMTIMEOUTS CommTimeOuts)
 {
 	ASSERT(m_hComm != INVALID_HANDLE_VALUE);
+	return SetCommTimeouts(m_hComm,&CommTimeOuts);
+}
+
+BOOL CCESeries::SyncSetSeriesTimeouts(DWORD ReadIntervalTimeout,DWORD ReadTotalTimeoutMultiplier,DWORD ReadTotalTimeoutConstant,DWORD WriteTotalTimeoutMultiplier,DWORD WriteTotalTimeoutConstant)
+{
+	COMMTIMEOUTS CommTimeOuts;
+	ASSERT(m_hComm != INVALID_HANDLE_VALUE);
+	GetCommTimeouts (m_hComm, &CommTimeOuts);
+	CommTimeOuts.ReadIntervalTimeout = ReadIntervalTimeout;  
+	CommTimeOuts.ReadTotalTimeoutMultiplier = ReadTotalTimeoutMultiplier;  
+	CommTimeOuts.ReadTotalTimeoutConstant =ReadTotalTimeoutConstant;    
+	CommTimeOuts.WriteTotalTimeoutMultiplier = WriteTotalTimeoutMultiplier;  
+	CommTimeOuts.WriteTotalTimeoutConstant = WriteTotalTimeoutConstant;  
 	return SetCommTimeouts(m_hComm,&CommTimeOuts);
 }
 

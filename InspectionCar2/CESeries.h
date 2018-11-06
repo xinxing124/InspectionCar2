@@ -38,12 +38,13 @@ public:
 				  );
 	//关闭串口
 	void ClosePort();
-	//同步写入数据
+	//异步步写入数据
 	BOOL WriteSyncPort(const BYTE*buf , DWORD bufLen);
-	//异步读取数据
-	BOOL ReadAsynPort(const BYTE*buf , DWORD bufLen,DWORD overtime,DWORD asynLen,BYTE* asynbuf);
+	//同步读取数据
+	DWORD SyncReadPort(const BYTE*buf , DWORD bufLen,DWORD syncLen,BYTE* syncbuf);
 	//设置串口读取、写入超时
 	BOOL SetSeriesTimeouts(COMMTIMEOUTS CommTimeOuts);
+	BOOL SyncSetSeriesTimeouts(DWORD ReadIntervalTimeout,DWORD ReadTotalTimeoutMultiplier,DWORD ReadTotalTimeoutConstant,DWORD WriteTotalTimeoutMultiplier,DWORD WriteTotalTimeoutConstant);
 	//得到串口是否打开
 	BOOL GetComOpened();
 private:
